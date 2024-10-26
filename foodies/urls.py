@@ -15,6 +15,8 @@ urlpatterns=[
   path('item_category/',views.food_category_api.as_view(), name='item_category'),
   path('view_item_category/',views.view_category_api.as_view(), name='view item_category'),
   path('items/category/<int:itemcategory_id>/', views.ViewItemByCategoryAPI.as_view(), name='items_by_category'),
+  path('delete/category/<int:itemcategory_id>/',views.delete_single_category_api.as_view(), name='delete-category'),
+
   path('item_review/',views.review_item_api.as_view(),name='reviews'),
   path('viewsinglereview/<int:id>',views.view_singlereview_api.as_view(),name='viewsinglereview'),
   path('updatesinglereview/<int:id>',views.update_single_review_api.as_view(),name='deletelereview'),

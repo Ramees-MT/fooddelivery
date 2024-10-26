@@ -208,25 +208,57 @@ class update_items_api(GenericAPIView):
       else:
         return Response({'data':'not uodated'})
       
+cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
+
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+import cloudinary.uploader
+from .serializers import FoodcategorySerializer  # Adjust as necessary
+from . import models  # Make sure to import your models
 
 class food_category_api(GenericAPIView):
-  serializer_class=FoodcategorySerializer
-  def post(self,request):
-    categoryname=request.data.get('categoryname')
-    categoryimage=request.data.get('categoryimage')
+    serializer_class = FoodcategorySerializer
 
-    serializer=self.serializer_class(data={'categoryname':categoryname,'categoryimage':categoryimage,})
-    if serializer.is_valid():
-      serializer.save()
-      return Response({'data':serializer.data,'message':'product added successfully','succes':1},status=status.HTTP_200_OK)
-   
-    return Response({'data':serializer.errors,'message':'failed','succes':0})
+    def post(self, request):
+        categoryname = request.data.get('categoryname')
+        categoryimage = request.FILES.get('categoryimage')  # Correctly access FILES
+
+        if not categoryimage:
+            return Response({'message': 'Upload a valid image', 'error': True}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Upload the image to Cloudinary
+            upload_data = cloudinary.uploader.upload(categoryimage)
+            itemimage_url = upload_data['url']  # Get the URL of the uploaded image
+            
+            # Prepare data for the serializer
+            serializer_data = {
+                'categoryname': categoryname,
+                'categoryimage': itemimage_url  # Use the uploaded image URL
+            }
+
+            serializer = self.serializer_class(data=serializer_data)
+            if serializer.is_valid():
+                serializer.save()  # Save the new category to the database
+                return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, 
+                                status=status.HTTP_201_CREATED)
+            
+            return Response({'data': serializer.errors, 'message': 'Failed to save category', 'success': 0}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'message': str(e), 'error': True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    
   
 
 class view_category_api(GenericAPIView):
     serializer_class=FoodcategorySerializer
     def get(self,request):
         user=Foodcategory.objects.all()
+        print(user)
         if (user.count()>0):
             serializer=FoodcategorySerializer(user,many=True)
             return Response({'data':serializer.data,'message':'data get','success':True},status=status.HTTP_200_OK)
@@ -247,6 +279,13 @@ class ViewItemByCategoryAPI(GenericAPIView):
             serializer = FooditemsSerializer(food_items, many=True)
             return Response({'data': serializer.data, 'message': 'data retrieved', 'success': True}, status=status.HTTP_200_OK)
         return Response({'data': 'No data available', 'message': 'No items found for the specified category', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+    
+class delete_single_category_api(GenericAPIView):
+  def delete(self,request,id):
+    result=Foodcategory.objects.get(pk=id)
+    result.delete()
+    return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
+  
   
    
    

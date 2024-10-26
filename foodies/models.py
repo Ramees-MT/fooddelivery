@@ -19,7 +19,7 @@ class Registration(models.Model):
 
 class Foodcategory(models.Model):
   categoryname=models.CharField(max_length=50)
-  categoryimage=models.ImageField()
+  categoryimage=models.URLField(max_length=200)
 
 
 class Fooditems(models.Model):
