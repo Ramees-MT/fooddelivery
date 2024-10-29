@@ -41,7 +41,7 @@ urlpatterns=[
   path('deleteoffer/<int:id>',views.delete_offers_api.as_view(), name='deleteoffer'),
 
 
-
+]
 
   
 
@@ -64,4 +64,3 @@ urlpatterns=[
 
 
 
-]

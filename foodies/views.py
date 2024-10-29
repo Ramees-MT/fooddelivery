@@ -151,26 +151,84 @@ class food_items_api(GenericAPIView):
         try:
             upload_data = cloudinary.uploader.upload(itemimage)
             itemimage_url = upload_data['url'] 
-            
-            itemcategory = models.Foodcategory.objects.get(id=itemcategory_id)
-        
-        except models.Foodcategory.DoesNotExist:
-            return Response({'data': {'itemcategory': 'Category not found'}, 'message': 'failed', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = self.serializer_class(data={
+            serializer = self.serializer_class(data={
             'itemname': itemname,
             'itemprice': itemprice,
             'itemdescription': itemdescription,
             'itemimage': itemimage_url, 
-            'itemcategory': itemcategory.id
+            'itemcategory': itemcategory_id
         })
+            if serializer.is_valid():
+                 serializer.save()
+                 print(serializer)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, status=status.HTTP_200_OK)
+                 return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, status=status.HTTP_200_OK)
 
-        return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
-   
+            return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as a:
+            return Response({'data': {'itemcategory': 'Category not found'}, 'message': 'failed', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+# class food_items_api(GenericAPIView):
+#     serializer_class = FooditemsSerializer
+
+#     def post(self, request):
+#         itemname = request.data.get('itemname')
+#         itemprice = request.data.get('itemprice')
+#         itemdescription = request.data.get('itemdescription')
+#         itemimage = request.FILES.get('itemimage')
+#         itemcategory_id = request.data.get('itemcategory')  # Expected to be a category ID from the request
+
+#         if not itemimage:
+#             return Response({'message': 'Upload a valid image', 'error': True}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Verify if the category exists
+#         try:
+#             category = models.Category.objects.get(id=itemcategory_id)
+#         except models.Category.DoesNotExist:
+#             return Response({'data': {'itemcategory': 'Category not found'}, 'message': 'Failed', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             # Upload image to Cloudinary
+#             upload_data = cloudinary.uploader.upload(itemimage)
+#             itemimage_url = upload_data['url']
+
+#             # Prepare data for serializer
+#             serializer_data = {
+#                 'itemname': itemname,
+#                 'itemprice': itemprice,
+#                 'itemdescription': itemdescription,
+#                 'itemimage': itemimage_url,
+#                 'itemcategory': itemcategory_id  # Directly using itemcategory_id here
+#             }
+
+#             serializer = self.serializer_class(data=serializer_data)
+
+#             if serializer.is_valid():
+#                 # Save the food item and retrieve its data
+#                 food_item = serializer.save()
+#                 return Response({
+#                     'data': {
+#                         'id': food_item.id,
+#                         'itemname': food_item.itemname,
+#                         'itemprice': food_item.itemprice,
+#                         'itemdescription': food_item.itemdescription,
+#                         'itemimage': food_item.itemimage,
+#                         'itemcategory': category.categoryname
+#                     },
+#                     'message': 'Product added successfully',
+#                     'success': 1
+#                 }, status=status.HTTP_201_CREATED)
+
+#             return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+
+#         except Exception as e:
+#             print(f"Error: {str(e)}")
+#             return Response({'data': {'error': 'Unexpected error occurred'}, 'message': 'Failed', 'success': 0}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+       
     
 
 class view_item_api(GenericAPIView):
@@ -210,12 +268,7 @@ class update_items_api(GenericAPIView):
       
 cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
 
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.generics import GenericAPIView
-import cloudinary.uploader
-from .serializers import FoodcategorySerializer  # Adjust as necessary
-from . import models  # Make sure to import your models
+
 
 class food_category_api(GenericAPIView):
     serializer_class = FoodcategorySerializer
