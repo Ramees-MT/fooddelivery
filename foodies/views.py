@@ -706,32 +706,40 @@ class search_api(GenericAPIView):
    
 cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
 class add_offer_api(GenericAPIView):
-  serializer_class=SpecialofferSerializer
-  def post(self,request):
-    itemname=request.data.get('itemname')
-    
-    offerdetails=request.data.get('offerdetails')
-    itemimage=request.FILES.get('itemimage')
-    if not itemimage:
-       return Response({'message':'upload a valid image'})
-    try:
-       upload_data=cloudinary.uploader.upload(itemimage)
-       itemimage_url=upload_data['url']
-       serializer_data={
-          'offerdetails':offerdetails,
-          'itemname':itemname,
-          'itemimage':itemimage_url
-       }
-       serializer=self.serializer_class(data=serializer_data)
+    serializer_class = SpecialofferSerializer
 
-       if serializer.is_valid():
-           serializer.save()
-           return Response({'data':serializer.data,'message':'product added successfully','succes':1},status=status.HTTP_200_OK)
-   
-       return Response({'data':serializer.errors,'message':'failed','succes':0})
-    except Exception as e:
-       return Response({'message':str(e),'error':True},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def post(self, request):
+        itemname = request.data.get('itemname')
+        offerdetails = request.data.get('offerdetails')
+        itemimage = request.FILES.get('itemimage')
 
+        # Check if itemimage is provided
+        if not itemimage:
+            return Response({'message': 'Upload a valid image'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Upload image to Cloudinary
+            upload_data = cloudinary.uploader.upload(itemimage)
+            itemimage_url = upload_data['secure_url']  # Use secure_url for HTTPS links
+
+            # Prepare data for serializer
+            serializer_data = {
+                'offerdetails': offerdetails,
+                'itemname': itemname,
+                'itemimage': itemimage_url
+            }
+
+            serializer = self.serializer_class(data=serializer_data)
+
+            # Validate and save the serializer
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, status=status.HTTP_201_CREATED)
+
+            return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'message': str(e), 'error': True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
   
