@@ -721,6 +721,7 @@ class search_api(GenericAPIView):
 #     return Response({'data':serializer.errors,'message':'failed','succes':0})
 
 
+cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
 
 class add_offer_api(GenericAPIView):
     serializer_class = SpecialofferSerializer
