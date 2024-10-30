@@ -80,8 +80,8 @@ class Address(models.Model):
 
 class Special_offer(models.Model):
    itemname=models.CharField(max_length=50)
-   itemimage=models.ImageField()
-   offerdetails=models.URLField(max_length=200)
+   itemimage=models.URLField(max_length=200)
+   offerdetails=models.CharField(max_length=200)
 
 
 
