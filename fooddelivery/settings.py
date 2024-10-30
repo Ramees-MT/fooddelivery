@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
 ]
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -79,10 +80,15 @@ WSGI_APPLICATION = 'fooddelivery.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.nylowtatpasslaflnjuv',
+        'PASSWORD': 'UZpPXYwaFeKjWCZv',
+        'HOST': 'aws-0-ap-south-1.pooler.supabase.com',  # Or an IP address like '127.0.0.1'
+        'PORT': '6543',       # Default PostgreSQL port
     }
 }
+
 
 
 # Password validation
