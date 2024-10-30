@@ -705,20 +705,54 @@ class search_api(GenericAPIView):
     return Response({'error': 'no search query provided', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
    
 
-class add_offer_api(GenericAPIView):
-  serializer_class=SpecialofferSerializer
-  def post(self,request):
-    itemname=request.data.get('itemname')
+# class add_offer_api(GenericAPIView):
+#   serializer_class=SpecialofferSerializer
+#   def post(self,request):
+#     itemname=request.data.get('itemname')
     
-    offerdetails=request.data.get('offerdetails')
-    itemimage=request.data.get('itemimage')
-    serializer=self.serializer_class(data={'itemname':itemname,'itemimage':itemimage,'offerdetails':offerdetails})
+#     offerdetails=request.data.get('offerdetails')
+#     itemimage=request.FILES.get('itemimage')
+#     serializer=self.serializer_class(data={'itemname':itemname,'itemimage':itemimage,'offerdetails':offerdetails})
 
-    if serializer.is_valid():
-      serializer.save()
-      return Response({'data':serializer.data,'message':'product added successfully','succes':1},status=status.HTTP_200_OK)
+#     if serializer.is_valid():
+#       serializer.save()
+#       return Response({'data':serializer.data,'message':'product added successfully','succes':1},status=status.HTTP_200_OK)
    
-    return Response({'data':serializer.errors,'message':'failed','succes':0})
+#     return Response({'data':serializer.errors,'message':'failed','succes':0})
+
+
+
+class add_offer_api(GenericAPIView):
+    serializer_class = SpecialofferSerializer
+
+    def post(self, request):
+        itemname = request.data.get('itemname')
+        offerdetails = request.data.get('offerdetails')
+        itemimage = request.FILES.get('itemimage')  # Get the file from request.FILES
+
+        if not itemimage:
+            return Response({'message': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Upload image to Cloudinary
+            upload_result = cloudinary.uploader.upload(itemimage)
+            itemimage_url = upload_result['secure_url']  # Get the secure URL of the uploaded image
+        except Exception as e:
+            return Response({'message': 'Image upload failed', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Prepare data for serializer
+        serializer = self.serializer_class(data={
+            'itemname': itemname,
+            'itemimage': itemimage_url,  # Store the Cloudinary URL
+            'offerdetails': offerdetails
+        })
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, status=status.HTTP_201_CREATED)
+
+        return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+
   
 
 
