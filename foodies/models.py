@@ -44,7 +44,7 @@ class Cart(models.Model):
    quantity=models.CharField(max_length=50)
    cart_status=models.IntegerField(default=1)
    itemprice=models.DecimalField(max_digits=10, decimal_places=2)
-   itemimage=models.ImageField()
+   itemimage=models.URLField(max_length=200)
 
 
 class Wishlist(models.Model):
@@ -82,6 +82,11 @@ class Special_offer(models.Model):
    itemname=models.CharField(max_length=50)
    itemimage=models.URLField(max_length=200)
    offerdetails=models.CharField(max_length=200)
+
+class Weekly_special(models.Model):
+   specialname=models.CharField(max_length=50)
+   specialimage=models.URLField(max_length=200)
+
 
 
 

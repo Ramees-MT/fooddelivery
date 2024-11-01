@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
-from .serializers import RegistrationSerializer,LoginSerializer,FooditemsSerializer,FoodcategorySerializer,ReviewSerializer,CartSerializer,WishlistSerializer,PlaceorderSerializer,AddressSerializer,SpecialofferSerializer
-from .models import Registration,Login,Fooditems,Foodcategory,Review,Cart,Wishlist,Placeorder,Address,Special_offer
+from .serializers import RegistrationSerializer,LoginSerializer,FooditemsSerializer,FoodcategorySerializer,ReviewSerializer,CartSerializer,WishlistSerializer,PlaceorderSerializer,AddressSerializer,SpecialofferSerializer,SpecialitemsSerializer
+from .models import Registration,Login,Fooditems,Foodcategory,Review,Cart,Wishlist,Placeorder,Address,Special_offer,Weekly_special
 from rest_framework.response import Response
 from rest_framework import generics, status
 from django.db.models import Q
@@ -704,6 +704,8 @@ class search_api(GenericAPIView):
 
     return Response({'error': 'no search query provided', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
    
+
+
 cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
 class add_offer_api(GenericAPIView):
     serializer_class = SpecialofferSerializer
@@ -772,3 +774,41 @@ class delete_offers_api(GenericAPIView):
     result.delete()
     return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
    
+
+
+cloudinary.config(cloud_name ='dbhudbwpy',api_key='767256978968971',api_secret='UwjEUJ3JcyiTPP-kOgM_GK0O-yg' )
+class add_special_api(GenericAPIView):
+    serializer_class = SpecialitemsSerializer
+
+    def post(self, request):
+        
+        specialname = request.data.get('specialname')
+        specialimage = request.FILES.get('specialimage')
+
+        # Check if itemimage is provided
+        if not specialimage:
+            return Response({'message': 'Upload a valid image'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Upload image to Cloudinary
+            upload_data = cloudinary.uploader.upload(specialimage)
+            itemimage_url = upload_data['secure_url']  # Use secure_url for HTTPS links
+
+            # Prepare data for serializer
+            serializer_data = {
+                
+                'specialname': specialname,
+                'specialimage': itemimage_url
+            }
+
+            serializer = self.serializer_class(data=serializer_data)
+
+            # Validate and save the serializer
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'data': serializer.data, 'message': 'Product added successfully', 'success': 1}, status=status.HTTP_201_CREATED)
+
+            return Response({'data': serializer.errors, 'message': 'Failed to add product', 'success': 0}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'message': str(e), 'error': True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

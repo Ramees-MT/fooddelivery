@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from.models import Registration,Login,Fooditems,Foodcategory,Review,Cart,Wishlist,Placeorder,Address,Special_offer
+from.models import Registration,Login,Fooditems,Foodcategory,Review,Cart,Wishlist,Placeorder,Address,Special_offer,Weekly_special
 
 class RegistrationSerializer(serializers.ModelSerializer):
   class Meta:
@@ -49,4 +49,9 @@ class AddressSerializer(serializers.ModelSerializer):
 class SpecialofferSerializer(serializers.ModelSerializer):
   class Meta:
     model=Special_offer
+    fields='__all__'
+
+class SpecialitemsSerializer(serializers.ModelSerializer):
+  class Meta:
+    model=Weekly_special
     fields='__all__'

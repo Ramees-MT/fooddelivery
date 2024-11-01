@@ -39,6 +39,8 @@ urlpatterns=[
   path('view_offers_items/', views.view_offers_api.as_view(), name='view offers'),
   path('update_offers/<int:id>',views.update_offers_api.as_view(), name='updateoffers'),
   path('deleteoffer/<int:id>',views.delete_offers_api.as_view(), name='deleteoffer'),
+  path('add_special/', views.add_special_api.as_view(), name='add offers'),
+
 
 
 ]
