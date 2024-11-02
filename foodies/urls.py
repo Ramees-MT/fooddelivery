@@ -40,6 +40,8 @@ urlpatterns=[
   path('update_offers/<int:id>',views.update_offers_api.as_view(), name='updateoffers'),
   path('deleteoffer/<int:id>',views.delete_offers_api.as_view(), name='deleteoffer'),
   path('add_special/', views.add_special_api.as_view(), name='add offers'),
+ path('increment_quantity/',views.IncrementQuantityAPI.as_view(), name='increment_quantity')
+
 
 
 

@@ -812,3 +812,41 @@ class add_special_api(GenericAPIView):
 
         except Exception as e:
             return Response({'message': str(e), 'error': True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+class IncrementQuantityAPI(GenericAPIView):
+    serializer_class = CartSerializer
+    queryset = Cart.objects.all()
+
+    def post(self, request):
+        itemid = request.data.get('itemid')
+        userid = request.data.get('userid')
+
+        # Validate that itemid and userid are provided
+        if not itemid or not userid:
+            return Response(
+                {"error": "itemid and userid are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Retrieve the cart item for the given itemid and userid
+            cart_item = Cart.objects.get(itemid=itemid, userid=userid)
+            # Increment the quantity
+            cart_item.quantity += 1
+            cart_item.save()
+
+            # Serialize the updated cart item
+            serializer = self.get_serializer(cart_item)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Cart.DoesNotExist:
+            return Response(
+                {"error": "Cart item not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+   
