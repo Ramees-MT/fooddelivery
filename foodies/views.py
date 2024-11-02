@@ -817,11 +817,7 @@ class add_special_api(GenericAPIView):
 
 
 
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.generics import GenericAPIView
-from .models import Cart
-from .serializers import CartSerializer
+
 
 class IncrementQuantityAPI(GenericAPIView):
     serializer_class = CartSerializer
@@ -855,4 +851,45 @@ class IncrementQuantityAPI(GenericAPIView):
             )
 
 
-   
+
+
+
+
+class DecrementQuantityAPI(GenericAPIView):
+    serializer_class = CartSerializer
+    queryset = Cart.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        itemid = request.data.get('itemid')
+        userid = request.data.get('userid')
+
+        if not itemid or not userid:
+            return Response(
+                {"error": "itemid and userid are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            cart_item = Cart.objects.get(itemid=itemid, userid=userid)
+
+            # Decrement quantity, but ensure it does not go below zero
+            new_quantity = int(cart_item.quantity) - 1
+            if new_quantity < 0:
+                new_quantity = 0
+            cart_item.quantity = new_quantity
+            cart_item.save()
+
+            message = "The quantity for item ID " + str(itemid) + " is now " + str(cart_item.quantity)
+            serializer = self.get_serializer(cart_item)
+            return Response({"message": message, "data": serializer.data}, status=status.HTTP_200_OK)
+
+        except Cart.DoesNotExist:
+            return Response(
+                {"error": "Cart item not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValueError:
+            return Response(
+                {"error": "Invalid quantity value. Quantity must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST
+            )

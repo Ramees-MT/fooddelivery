@@ -41,7 +41,7 @@ class Cart(models.Model):
    itemname=models.CharField(max_length=50)
    itemid=models.CharField(max_length=7)
    userid=models.CharField(max_length=50)
-   quantity=models.CharField(max_length=50)
+   quantity=models.IntegerField(default=1)
    cart_status=models.IntegerField(default=1)
    itemprice=models.DecimalField(max_digits=10, decimal_places=2)
    itemimage=models.URLField(max_length=200)
