@@ -817,15 +817,20 @@ class add_special_api(GenericAPIView):
 
 
 
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from .models import Cart
+from .serializers import CartSerializer
+
 class IncrementQuantityAPI(GenericAPIView):
     serializer_class = CartSerializer
     queryset = Cart.objects.all()
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         itemid = request.data.get('itemid')
         userid = request.data.get('userid')
 
-        # Validate that itemid and userid are provided
         if not itemid or not userid:
             return Response(
                 {"error": "itemid and userid are required"},
@@ -833,20 +838,21 @@ class IncrementQuantityAPI(GenericAPIView):
             )
 
         try:
-            # Retrieve the cart item for the given itemid and userid
             cart_item = Cart.objects.get(itemid=itemid, userid=userid)
-            # Increment the quantity
             cart_item.quantity += 1
             cart_item.save()
 
-            # Serialize the updated cart item
+            # Example of concatenating strings correctly
+            message = "The quantity for item ID " + str(itemid) + " is now " + str(cart_item.quantity)
+            
             serializer = self.get_serializer(cart_item)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"message": message, "data": serializer.data}, status=status.HTTP_200_OK)
 
         except Cart.DoesNotExist:
             return Response(
                 {"error": "Cart item not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+
 
    
