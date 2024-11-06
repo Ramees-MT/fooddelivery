@@ -538,7 +538,7 @@ class placeorder_api(GenericAPIView):
                 ordered = {
                     'itemid': i.itemid,
                     'itemname': i.itemname,
-                    'itemimage': i.itemimage,
+                    'itemimage': productimage,
                     'itemprice': i.itemprice,
                     'userid': i.userid,
                     'quantity': i.quantity,
