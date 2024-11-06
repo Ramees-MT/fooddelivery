@@ -42,6 +42,7 @@ urlpatterns=[
   path('add_special/', views.add_special_api.as_view(), name='add offers'),
   path('increment_quantity/',views.IncrementQuantityAPI.as_view(), name='increment_quantity'),
   path('decrement_quantity/',views.DecrementQuantityAPI.as_view(), name='decrement_quantity'),
+  path('place-order/<int:userid>/',views.PlaceOrderFromFoodItemsAPI.as_view(), name='place-order'),
 
 
 

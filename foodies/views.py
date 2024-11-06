@@ -564,6 +564,72 @@ class placeorder_api(GenericAPIView):
         else:
             # If no cart items exist
             return Response({'error': 'No order placed', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+class PlaceOrderFromFoodItemsAPI(GenericAPIView):
+    serializer_class = PlaceorderSerializer
+
+    def post(self, request, userid):
+        # Assume that the request contains a list of item IDs and quantities
+        items = request.data.get('items', [])
+
+        if not items:
+            return Response(
+                {'error': 'No food items provided for the order', 'success': False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        orders = []
+
+        for item in items:
+            item_id = item.get('itemid')
+            quantity = item.get('quantity')
+
+            try:
+                # Fetch the food item from the database
+                food_item = Fooditems.objects.get(id=item_id)
+
+                # Prepare the order data
+                order_data = {
+                    'itemid': item_id,
+                    'itemname': food_item.itemname,
+                    'itemimage': food_item.itemimage,
+                    'itemprice': food_item.itemprice,
+                    'userid': userid,
+                    'quantity': quantity,
+                }
+
+                # Serialize the order data
+                serializer = self.serializer_class(data=order_data)
+
+                # Check if the serializer is valid and save the data
+                if serializer.is_valid():
+                    serializer.save()
+                    orders.append(serializer.data)
+                else:
+                    # Return errors if the serializer is invalid
+                    return Response(
+                        {'errors': serializer.errors, 'success': False},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            except Fooditems.DoesNotExist:
+                # Return error if the food item does not exist
+                return Response(
+                    {'error': f'Food item with ID {item_id} does not exist', 'success': False},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        # Return success response with the placed orders
+        return Response(
+            {'data': orders, 'message': 'Order placed successfully', 'success': True},
+            status=status.HTTP_200_OK
+        )
+
+
+
+
 
 class view_orders_api(GenericAPIView):
    serializer_class=PlaceorderSerializer
