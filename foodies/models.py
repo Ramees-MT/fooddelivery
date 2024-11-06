@@ -64,7 +64,7 @@ class Placeorder(models.Model):
    quantity=models.CharField(max_length=50)
    cart_status=models.IntegerField(default=1)
    itemprice=models.DecimalField(max_digits=10, decimal_places=2)
-   itemimage=models.ImageField()
+   itemimage=models.URLField(max_length=200)
    date=models.DateTimeField(auto_now=True)
 
 class Address(models.Model):
