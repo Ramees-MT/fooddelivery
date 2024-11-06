@@ -670,37 +670,21 @@ class change_pass_api(GenericAPIView):
 
 class search_api(GenericAPIView):
    serializer_class=FooditemsSerializer
-   def post(self,request):
-      search_query=request.data.get('search_query','')
-      if search_query:
-         items=Fooditems.objects.filter(
-            Q(itemname__exact=search_query)
-         )
-         print('filtered products',items)
-         if not items:
-             return Response({'Message':'no products found'},status=status.HTTP_400_BAD_REQUEST)
-         serializer=self.serializer_class(items,many=True)
-         for product in serializer.data:
-            if product['itemimage']:
-               product['itemimage']=settings.MEDIA_URL+product['itemimage']
-            return Response({'data': serializer.data, 'message': 'image fetched successfully', 'success': True}, status=status.HTTP_200_OK)
-
-         return Response({'error': 'no query found', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
-      
+   
    def get(self, request):
     search_query = request.query_params.get('search_query', '')
     print(search_query)  
     if search_query:
         items = Fooditems.objects.filter(
             Q(itemname__icontains=search_query) 
-        ).values('itemname').distinct()[:10] 
-        
+        )
+        print(items)
         if not Fooditems.objects.exists(): 
             return Response({'Message': 'no suggestions found'}, status=status.HTTP_400_BAD_REQUEST)
 
-        suggestion_list = [{'item_name': item['itemname']} for item in items]
+        suggestion_list = FooditemsSerializer(items,many=True)
         
-        return Response({'suggestion': suggestion_list, 'message': 'suggestions fetched successfully', 'success': True}, status=status.HTTP_200_OK)
+        return Response({'suggestion': suggestion_list.data, 'message': 'suggestions fetched successfully', 'success': True}, status=status.HTTP_200_OK)
 
     return Response({'error': 'no search query provided', 'success': False}, status=status.HTTP_400_BAD_REQUEST)
    
