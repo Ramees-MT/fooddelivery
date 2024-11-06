@@ -70,7 +70,7 @@ class Placeorder(models.Model):
 class Address(models.Model):
     name=models.CharField(max_length=50)
     street = models.CharField(max_length=255)
-    userid=models.OneToOneField(Login,on_delete=models.CASCADE)
+    userid=models.ForeignKey(Login,on_delete=models.CASCADE)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     country = models.CharField(max_length=100)

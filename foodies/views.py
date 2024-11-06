@@ -567,65 +567,65 @@ class placeorder_api(GenericAPIView):
         
 
 
-class PlaceOrderFromFoodItemsAPI(GenericAPIView):
-    serializer_class = PlaceorderSerializer
+# class PlaceOrderFromFoodItemsAPI(GenericAPIView):
+#     serializer_class = PlaceorderSerializer
 
-    def post(self, request, userid):
-        # Assume that the request contains a list of item IDs and quantities
-        items = request.data.get('items', [])
+#     def post(self, request, userid):
+#         # Assume that the request contains a list of item IDs and quantities
+#         items = request.data.get('items', [])
 
-        if not items:
-            return Response(
-                {'error': 'No food items provided for the order', 'success': False},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         if not items:
+#             return Response(
+#                 {'error': 'No food items provided for the order', 'success': False},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        orders = []
+#         orders = []
 
-        for item in items:
-            item_id = item.get('itemid')
-            quantity = item.get('quantity')
+#         for item in items:
+#             item_id = item.get('itemid')
+#             quantity = item.get('quantity')
 
-            try:
-                # Fetch the food item from the database
-                food_item = Fooditems.objects.get(id=item_id)
+#             try:
+#                 # Fetch the food item from the database
+#                 food_item = Fooditems.objects.get(id=item_id)
 
-                # Prepare the order data
-                order_data = {
-                    'itemid': item_id,
-                    'itemname': food_item.itemname,
-                    'itemimage': food_item.itemimage,
-                    'itemprice': food_item.itemprice,
-                    'userid': userid,
-                    'quantity': quantity,
-                }
+#                 # Prepare the order data
+#                 order_data = {
+#                     'itemid': item_id,
+#                     'itemname': food_item.itemname,
+#                     'itemimage': food_item.itemimage,
+#                     'itemprice': food_item.itemprice,
+#                     'userid': userid,
+#                     'quantity': quantity,
+#                 }
 
-                # Serialize the order data
-                serializer = self.serializer_class(data=order_data)
+#                 # Serialize the order data
+#                 serializer = self.serializer_class(data=order_data)
 
-                # Check if the serializer is valid and save the data
-                if serializer.is_valid():
-                    serializer.save()
-                    orders.append(serializer.data)
-                else:
-                    # Return errors if the serializer is invalid
-                    return Response(
-                        {'errors': serializer.errors, 'success': False},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+#                 # Check if the serializer is valid and save the data
+#                 if serializer.is_valid():
+#                     serializer.save()
+#                     orders.append(serializer.data)
+#                 else:
+#                     # Return errors if the serializer is invalid
+#                     return Response(
+#                         {'errors': serializer.errors, 'success': False},
+#                         status=status.HTTP_400_BAD_REQUEST
+#                     )
 
-            except Fooditems.DoesNotExist:
-                # Return error if the food item does not exist
-                return Response(
-                    {'error': f'Food item with ID {item_id} does not exist', 'success': False},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+#             except Fooditems.DoesNotExist:
+#                 # Return error if the food item does not exist
+#                 return Response(
+#                     {'error': f'Food item with ID {item_id} does not exist', 'success': False},
+#                     status=status.HTTP_404_NOT_FOUND
+#                 )
 
-        # Return success response with the placed orders
-        return Response(
-            {'data': orders, 'message': 'Order placed successfully', 'success': True},
-            status=status.HTTP_200_OK
-        )
+#         # Return success response with the placed orders
+#         return Response(
+#             {'data': orders, 'message': 'Order placed successfully', 'success': True},
+#             status=status.HTTP_200_OK
+#         )
 
 
 
@@ -640,6 +640,9 @@ class view_orders_api(GenericAPIView):
       print(f"Serialized data: {serializer.data}")
       return Response({'data':serializer.data,'message':'Data get','success':True},status=status.HTTP_200_OK)
    
+
+
+
 class Addadress_api(GenericAPIView):
     serializer_class = AddressSerializer    
 
@@ -654,8 +657,7 @@ class Addadress_api(GenericAPIView):
         postal_code = request.data.get('postal_code')
 
         # Check if an address already exists for the given userid
-        if Address.objects.filter(userid=userid).exists():
-            return Response({'error': 'Address already exists for this user'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         # Creating an address instance
         address_data = {
@@ -679,6 +681,52 @@ class Addadress_api(GenericAPIView):
         else:
             # If serializer is invalid, return errors
             return Response({'errors': serializer.errors, 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# class AddAddressAPI(GenericAPIView):
+#     serializer_class = AddressSerializer
+
+#     def post(self, request):
+#         # Extract the list of addresses from the request
+#         addresses = request.data.get('addresses', [])
+        
+#         if not isinstance(addresses, list):
+#             return Response({'error': 'Addresses should be provided as a list'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         response_data = []
+#         errors = []
+
+#         # Iterate over each address and process it
+#         for address_data in addresses:
+#             userid = address_data.get('userid')
+#             if not userid:
+#                 errors.append({'error': 'User ID is required for each address'})
+#                 continue
+
+#             # Check if the user exists (you can add more validation here)
+#             if not Login.objects.filter(id=userid).exists():
+#                 errors.append({'error': f'User with ID {userid} does not exist'})
+#                 continue
+
+#             # Add user ID to the address data
+#             address_data['userid'] = userid
+
+#             # Serialize the data
+#             serializer = self.serializer_class(data=address_data)
+            
+#             # Validate and save each address
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 response_data.append(serializer.data)
+#             else:
+#                 errors.append(serializer.errors)
+
+#         if errors:
+#             return Response({'errors': errors, 'success': False}, status=status.HTTP_400_BAD_REQUEST)
+        
+#         return Response({'data': response_data, 'message': 'Addresses added successfully', 'success': True}, status=status.HTTP_201_CREATED)
         
 
 class viewalladdress_api(GenericAPIView):
