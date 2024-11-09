@@ -743,7 +743,7 @@ class viewalladdress_api(GenericAPIView):
     
 
 
-class ViewAddressByUserIdApi(APIView):
+class ViewAddressByUserIdApi(GenericAPIView):
     serializer_class = AddressSerializer
 
     def get(self, request, *args, **kwargs):
