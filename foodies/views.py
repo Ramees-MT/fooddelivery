@@ -743,14 +743,23 @@ class viewalladdress_api(GenericAPIView):
     
 
 
-class ViewAddressByUserIdApi(GenericAPIView):
+class ViewAddressByUserIdApi(APIView):
     serializer_class = AddressSerializer
 
     def get(self, request, *args, **kwargs):
-        user_id = kwargs.get('user_id')  # Access user_id from kwargs
+        # Get the user_id from the URL kwargs and ensure it is an integer
+        try:
+            user_id = int(kwargs.get('user_id'))
+        except (TypeError, ValueError):
+            return Response(
+                {'error': 'Invalid user ID', 'success': False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Fetch the address for the given user_id (use 'userid' as the field name)
-        addresses = Address.objects.filter(userid=user_id)  # 'userid' is the correct field name
+        # Fetch the addresses for the given user_id (ensure the field name is correct)
+        addresses = Address.objects.filter(userid=user_id)  # 'userid' should match the field name in the Address model
+        
+        # Check if any addresses are found for the user
         if addresses.exists():
             serializer = AddressSerializer(addresses, many=True)
             return Response(
@@ -761,6 +770,8 @@ class ViewAddressByUserIdApi(GenericAPIView):
                 },
                 status=status.HTTP_200_OK
             )
+        
+        # If no addresses found, return a 404 response
         return Response(
             {
                 'error': 'Address not found for this user',
