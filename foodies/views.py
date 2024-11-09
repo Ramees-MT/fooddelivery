@@ -742,17 +742,32 @@ class viewalladdress_api(GenericAPIView):
         return Response({'error': 'Address not found for this user', 'success': False}, status=status.HTTP_404_NOT_FOUND)
     
 
+
 class UpdateAddress_api(GenericAPIView):
- 
-    serializer_class=AddressSerializer
-    def put(self,request,userid):
-      result=Address.objects.get(userid=userid)
-      serializer=AddressSerializer(instance = result,data=request.data,partial=True)
-      if serializer.is_valid():
-        serializer.save()
-        return Response({'data':serializer.data,'message':'updated successfully'},status=status.HTTP_200_OK)
-      else:
-        return Response({'data':'not uodated'})
+    serializer_class = AddressSerializer
+    
+    def put(self, request, userid):
+        # Filter instead of get to handle multiple addresses
+        addresses = Address.objects.filter(userid=userid)
+        
+        if not addresses.exists():
+            return Response({'message': 'No address found for this user'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Update all addresses for the user if needed, or refine to update a specific address
+        updated_count = 0
+        for address in addresses:
+            serializer = AddressSerializer(instance=address, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                updated_count += 1
+            else:
+                return Response({'data': 'not updated', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(
+            {'data': f'{updated_count} addresses updated successfully', 'message': 'Update successful'},
+            status=status.HTTP_200_OK
+        )
+
       
 class DeleteAddress_api(GenericAPIView):
   def delete(self,request,userid):
