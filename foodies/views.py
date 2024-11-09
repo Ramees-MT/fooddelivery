@@ -748,7 +748,7 @@ class ViewAddressByUserIdApi(GenericAPIView):
 
     def get(self, request, userid):
         # Fetch the address for the given user_id
-        addresses = Address.objects.filter(user_id=userid)  # Assuming 'user_id' is the foreign key field in Address model
+        addresses = Address.objects.filter(userid=userid)  # Assuming 'user_id' is the foreign key field in Address model
         if addresses.exists():
             serializer = AddressSerializer(addresses, many=True)
             return Response(
