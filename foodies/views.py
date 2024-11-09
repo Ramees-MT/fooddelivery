@@ -743,6 +743,32 @@ class viewalladdress_api(GenericAPIView):
     
 
 
+class ViewAddressByUserIdApi(GenericAPIView):
+    serializer_class = AddressSerializer
+
+    def get(self, request, user_id):
+        # Fetch the address for the given user_id
+        addresses = Address.objects.filter(user_id=user_id)  # Assuming 'user_id' is the foreign key field in Address model
+        if addresses.exists():
+            serializer = AddressSerializer(addresses, many=True)
+            return Response(
+                {
+                    'data': serializer.data,
+                    'message': 'Addresses retrieved successfully',
+                    'success': True
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            {
+                'error': 'Address not found for this user',
+                'success': False
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+
+
 class UpdateAddress_api(GenericAPIView):
 
     def put(self, request, userid, addressid):
