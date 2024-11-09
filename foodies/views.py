@@ -744,29 +744,23 @@ class viewalladdress_api(GenericAPIView):
 
 
 class UpdateAddress_api(GenericAPIView):
-    serializer_class = AddressSerializer
-    
-    def put(self, request, userid):
-        # Filter instead of get to handle multiple addresses
-        addresses = Address.objects.filter(userid=userid)
-        
-        if not addresses.exists():
-            return Response({'message': 'No address found for this user'}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Update all addresses for the user if needed, or refine to update a specific address
-        updated_count = 0
-        for address in addresses:
+
+    def put(self, request, userid, addressid):
+        try:
+            # Retrieve the address for the given user ID and address ID
+            address = Address.objects.get(userid=userid, id=addressid)
+            
+            # Serialize the data with the provided input
             serializer = AddressSerializer(instance=address, data=request.data, partial=True)
+            
+            # Check if the data is valid
             if serializer.is_valid():
-                serializer.save()
-                updated_count += 1
+                serializer.save()  # Save the updated address
+                return Response({'data': serializer.data, 'message': 'Address updated successfully'}, status=status.HTTP_200_OK)
             else:
-                return Response({'data': 'not updated', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response(
-            {'data': f'{updated_count} addresses updated successfully', 'message': 'Update successful'},
-            status=status.HTTP_200_OK
-        )
+                return Response({'data': 'Not updated', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Address.DoesNotExist:
+            return Response({'data': 'Address not found for the given user ID and address ID'}, status=status.HTTP_404_NOT_FOUND)
 
       
 class DeleteAddress_api(GenericAPIView):
