@@ -741,60 +741,56 @@ class viewalladdress_api(GenericAPIView):
               return Response({'data': serializer.data, 'message': 'Address retrieved successfully', 'success': True}, status=status.HTTP_200_OK)
         return Response({'error': 'Address not found for this user', 'success': False}, status=status.HTTP_404_NOT_FOUND)
 
-class ViewAddressByUserIdApi(GenericAPIView):
-  def get(self,request,id):
-    result=Address.objects.get(pk=id)
-    serializer=AddressSerializer(result)
-    return Response(serializer.data)
+
     
 
 
-# class ViewAddressByUserIdApi(GenericAPIView):
-#     serializer_class = AddressSerializer
+class ViewAddressByUserIdApi(GenericAPIView):
+    serializer_class = AddressSerializer
 
-#     def get(self, request, *args, **kwargs):
-#         # Directly get the user_id from the request path
-#         user_id = request.data.get('user_id')
+    def get(self, request, *args, **kwargs):
+        # Directly get the user_id from the request path
+        user_id = request.data.get('user_id')
 
-#         # Ensure the user_id is provided and is valid
-#         if not user_id:
-#             return Response(
-#                 {'error': 'User ID is required', 'success': False},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
+        # Ensure the user_id is provided and is valid
+        if not user_id:
+            return Response(
+                {'error': 'User ID is required', 'success': False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-#         # Validate if user_id is an integer
-#         try:
-#             user_id = int(user_id)
-#         except ValueError:
-#             return Response(
-#                 {'error': 'Invalid User ID format', 'success': False},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
+        # Validate if user_id is an integer
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return Response(
+                {'error': 'Invalid User ID format', 'success': False},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-#         # Query the Address model to find addresses for this user_id
-#         addresses = Address.objects.filter(userid_id=user_id)  # Assuming userid_id is the field for the foreign key
+        # Query the Address model to find addresses for this user_id
+        addresses = Address.objects.filter(userid_id=user_id)  # Assuming userid_id is the field for the foreign key
 
-#         if addresses.exists():
-#             # Serialize the addresses if found
-#             serializer = AddressSerializer(addresses, many=True)
-#             return Response(
-#                 {
-#                     'data': serializer.data,
-#                     'message': 'Addresses retrieved successfully',
-#                     'success': True
-#                 },
-#                 status=status.HTTP_200_OK
-#             )
+        if addresses.exists():
+            # Serialize the addresses if found
+            serializer = AddressSerializer(addresses, many=True)
+            return Response(
+                {
+                    'data': serializer.data,
+                    'message': 'Addresses retrieved successfully',
+                    'success': True
+                },
+                status=status.HTTP_200_OK
+            )
         
-#         # If no addresses are found, return an error response
-#         return Response(
-#             {
-#                 'error': 'No addresses found for this user',
-#                 'success': False
-#             },
-#             status=status.HTTP_404_NOT_FOUND
-#         )
+        # If no addresses are found, return an error response
+        return Response(
+            {
+                'error': 'No addresses found for this user',
+                'success': False
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
 
 
 class UpdateAddress_api(GenericAPIView):
