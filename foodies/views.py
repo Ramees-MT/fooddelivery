@@ -748,7 +748,7 @@ class ViewAddressByUserIdApi(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         # Directly get the user_id from the request path
-        user_id = request.GET.get('user_id')
+        user_id = request.data.get('user_id')
 
         # Ensure the user_id is provided and is valid
         if not user_id:
