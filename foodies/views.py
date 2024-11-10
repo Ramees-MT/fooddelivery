@@ -745,21 +745,16 @@ class viewalladdress_api(GenericAPIView):
     
 
 
-class ViewAddressByUserIdApi(GenericAPIView):
+class ViewAddressByUserIdApi(APIView):
     serializer_class = AddressSerializer
 
-    def get(self, request, *args, **kwargs):
-        # Directly get the user_id from the request path
-        user_id = request.data.get('user_id')
-
-        # Ensure the user_id is provided and is valid
-        if not user_id:
+    def get(self, request, user_id=None):
+        if user_id is None:
             return Response(
                 {'error': 'User ID is required', 'success': False},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Validate if user_id is an integer
+
         try:
             user_id = int(user_id)
         except ValueError:
@@ -768,11 +763,10 @@ class ViewAddressByUserIdApi(GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Query the Address model to find addresses for this user_id
-        addresses = Address.objects.filter(userid_id=user_id)  # Assuming userid_id is the field for the foreign key
+        # Fetch addresses for the given user_id
+        addresses = Address.objects.filter(userid_id=user_id)  # Use `userid_id` to filter by foreign key ID
 
         if addresses.exists():
-            # Serialize the addresses if found
             serializer = AddressSerializer(addresses, many=True)
             return Response(
                 {
@@ -782,8 +776,6 @@ class ViewAddressByUserIdApi(GenericAPIView):
                 },
                 status=status.HTTP_200_OK
             )
-        
-        # If no addresses are found, return an error response
         return Response(
             {
                 'error': 'No addresses found for this user',
