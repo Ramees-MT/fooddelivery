@@ -785,25 +785,40 @@ class ViewAddressByUserIdApi(GenericAPIView):
         )
 
 
-class UpdateAddress_api(GenericAPIView):
+class UpdateAddressApi(GenericAPIView):
+    serializer_class = AddressSerializer
 
-    def put(self, request, userid, addressid):
+    def put(self, request, address_id):
         try:
-            # Retrieve the address for the given user ID and address ID
-            address = Address.objects.get(userid=userid, id=addressid)
-            
-            # Serialize the data with the provided input
-            serializer = AddressSerializer(instance=address, data=request.data, partial=True)
-            
-            # Check if the data is valid
-            if serializer.is_valid():
-                serializer.save()  # Save the updated address
-                return Response({'data': serializer.data, 'message': 'Address updated successfully'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'data': 'Not updated', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            # Fetch the address by ID
+            address = Address.objects.get(id=address_id)
         except Address.DoesNotExist:
-            return Response({'data': 'Address not found for the given user ID and address ID'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': 'Address not found', 'success': False},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
+        # Serialize and validate data
+        serializer = AddressSerializer(address, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()  # Save changes if data is valid
+            return Response(
+                {
+                    'data': serializer.data,
+                    'message': 'Address updated successfully',
+                    'success': True
+                },
+                status=status.HTTP_200_OK
+            )
+
+        # If validation fails, return errors
+        return Response(
+            {
+                'error': serializer.errors,
+                'success': False
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
       
 class DeleteAddress_api(GenericAPIView):
   def delete(self,request,userid):
